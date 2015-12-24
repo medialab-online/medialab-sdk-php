@@ -1,0 +1,17 @@
+{
+	"name": "medialab/medialab-sdk-php",
+	"description": "MediaLab SDK for PHP",
+	"keywords" : [ "medialab" ],
+	"homepage": "http://www.medialab.co",
+	"license": "MIT",
+	"require": {
+		"php": ">= 5.3.0",
+		"ext-curl": "*",
+		"league/oauth2-client": "0.10.1"
+	},
+	"autoload": {
+		"psr-4": {
+			"Medialab\\": "src/Medialab/"
+		}
+	}
+}
