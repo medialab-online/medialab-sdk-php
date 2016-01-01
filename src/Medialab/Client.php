@@ -5,9 +5,9 @@ namespace Medialab;
 class Client {
 
 	/**
-	 * @var \Medialab\Config $config
+	 * @var \Medialab\OAuth\MedialabProvider $provider
 	 */
-	protected $config;
+	protected $provider;
 
 	/**
 	 * @var \League\OAuth2\Client\Token\AccessToken $token
@@ -16,18 +16,10 @@ class Client {
 
 	/**
 	 * Open new API instance
-	 * @param \Medialab\Config $config
+	 * @param array $options
 	 */
-	function __construct(Config $config) {
-		$this->config = $config;
-	}
-
-	/**
-	 * Get config
-	 * @return \Medialab\Config
-	 */
-	public function getConfig() {
-		return $this->config;
+	function __construct(array $options) {
+		$this->provider = new OAuth\MedialabProvider($options);
 	}
 
 	/**
@@ -35,11 +27,8 @@ class Client {
 	 * @param string $state unique string to prevent CSRF
 	 * @return string
 	 */
-	public function getAuthorizationUrl($state = null) {
-		$auth_url = $this->config->getProvider()->getAuthorizationUrl(array(
-			'state' => $state,
-		));
-		return $auth_url;
+	public function getAuthorizationUrl() {
+		return $this->provider->getAuthorizationUrl();
 	}
 
 	/**
@@ -48,11 +37,15 @@ class Client {
 	 * @return \League\OAuth2\Client\Token\AccessToken
 	 * @throws \InvalidArgumentException
 	 */
-	public function authenticate($authorization_code) {
-		$token = $this->config->getProvider()->getAccessToken('authorization_code', array(
-			'code' => $authorization_code
-		));
-		return $token;
+	public function loadAccessTokenFromAuthCode($authorization_code) {
+		try {
+			$this->token = $this->provider->getAccessToken('authorization_code', array(
+				'code' => $authorization_code
+			));
+		} catch (\League\OAuth2\Client\Provider\Exception\IdentityProviderException $ex) {
+			throw new \InvalidArgumentException($ex->getMessage());
+		}
+		return $this->token;
 	}
 
 	/**
@@ -66,11 +59,12 @@ class Client {
 		if($token_info === null) {
 			throw new \InvalidArgumentException('Invalid JSON for loading access_token');
 		}
+
 		// because the OAuth2 client package from PHP League has some consistency issues, we cannot pass the object directly
 		// instead make sure we have an array
 		$options = array(
-			'access_token' => isset($token_info->accessToken) ? $token_info->accessToken : null,
-			'refresh_token' => isset($token_info->refreshToken) ? $token_info->refreshToken : null,
+			'access_token' => isset($token_info->access_token) ? $token_info->access_token : null,
+			'refresh_token' => isset($token_info->refresh_token) ? $token_info->refresh_token : null,
 			'expires' => isset($token_info->expires) ? $token_info->expires : null,
 		);
 		$this->token = new \League\OAuth2\Client\Token\AccessToken($options);
@@ -84,37 +78,10 @@ class Client {
 	 * @throws \InvalidArgumentException
 	 */
 	public function loadAccessTokenFromRefreshToken($refresh_token) {
-		$grant = new \League\OAuth2\Client\Grant\RefreshToken();
-
-		$this->token = $this->config->getProvider()->getAccessToken($grant, array(
+		$this->token = $this->provider->getAccessToken('refresh_token', [
 			'refresh_token' => $refresh_token,
-		));
+		]);
 		return $this->token;
-	}
-
-	/**
-	 * Is the token expired, or expiring in the next 30 seconds?
-	 * @return boolean
-	 */
-	public function isAccessTokenExpired() {
-		if (!$this->token || !isset($this->token->expires)) {
-			return true;
-		}
-
-		// If the token is set to expire in the next 30 seconds.
-		return ($this->token->expires - 30) < time();
-	}
-
-	/**
-	 * Get the refresh token, if any.
-	 * @return string|null NULL if no refresh_token found, string otherwise
-	 */
-	public function getRefreshToken() {
-		if(isset($this->token->refresh_token)) {
-			return $this->token->refresh_token;
-		} else {
-			return null;
-		}
 	}
 
 	/**
@@ -124,5 +91,21 @@ class Client {
 	 */
 	public function getAccessToken() {
 		return $this->token;
+	}
+
+	/**
+	 * Get provider
+	 * @return \Medialab\OAuth\MedialabProvider
+	 */
+	public function getProvider() {
+		return $this->provider;
+	}
+
+	/**
+	 * Get state
+	 * @return string
+	 */
+	public function getState() {
+		return $this->provider->getState();
 	}
 }

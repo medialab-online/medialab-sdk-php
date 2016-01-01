@@ -1,37 +1,30 @@
 <?php
 
-require_once __DIR__ . '/../vendor/autoload.php';
-require_once __DIR__ . '/authenticate.php';
-
-$medialab_uri = '<YOUR_MEDIALAB_URI>';
-$client_id = '<YOUR_CLIENT_ID>';
-$client_secret = '<YOUR_CLIENT_SECRET>';
-$redirect_uri = '<YOUR_REDIRECT_URI>';
-$folder_id_target = 100;
+require_once __DIR__ . '/authorize.php';
 
 $config = new Medialab\Config();
-$config ->setMedialab($medialab_uri)
-		->setClient($client_id, $client_secret)
-		->setRedirectUri($redirect_uri)
+$config ->setMedialab(ML_MEDIALAB_URI)
+		->setClient(ML_API_CLIENT, ML_API_SECRET)
+		->setRedirectUri(ML_REDIRECT_URI)
+		->addScope(Medialab\Scopes::SCOPE_BASIC)
 		->addScope(Medialab\Scopes::SCOPE_UPLOAD);
 
-$client = new Medialab\Client($config);
-
 try {
-	$token = ml_api_authenticate($client);
-} catch (\InvalidArgumentException $ex) {
-	print_r($ex->getMessage().PHP_EOL);
+	ml_api_authenticate($config, 'upload.php');
+} catch (\Exception $ex) {
+	print_r($ex->getMessage());
 	die();
 }
 
+$media = new Medialab\Service\Media($config);
+
 try {
-	$service = new Medialab\Service\Upload($client);
-	$service->startUpload();
-	$file = $service->uploadFile($folder_id_target, __DIR__.'/../README.md');
+	$media->startUpload();
+	$file = $media->uploadFile(1, __DIR__.'/../README.md');
+	$media->finishUpload();
 	echo '<pre>';
-	pre($file);
+	print_r($file);
 	echo '</pre>';
-	$service->finishUpload();
-} catch(\Exception $ex) {
+} catch(Exception $ex) {
 	print_r('An error has occured while executing the API command: ' . $ex->getMessage());
 }

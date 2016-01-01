@@ -4,8 +4,8 @@ namespace Medialab\Service;
 
 class User extends MedialabService {
 
-	function __construct($client) {
-		parent::__construct($client);
+	function __construct($config) {
+		parent::__construct($config);
 	}
 
 	/**

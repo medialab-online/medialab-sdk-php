@@ -6,19 +6,21 @@ $config = new Medialab\Config();
 $config ->setMedialab(ML_MEDIALAB_URI)
 		->setClient(ML_API_CLIENT, ML_API_SECRET)
 		->setRedirectUri(ML_REDIRECT_URI)
-		->addScope(Medialab\Scopes::SCOPE_USER_INFO);
+		->addScope(Medialab\Scopes::SCOPE_BASIC)
+		->addScope(Medialab\Scopes::SCOPE_SHARE)
+		->addScope(Medialab\Scopes::SCOPE_MANAGE);
 
 try {
-	ml_api_authenticate($config, 'user.php');
+	ml_api_authenticate($config, 'media.php');
 } catch (\Exception $ex) {
 	print_r($ex->getMessage());
 	die();
 }
 
-$user = new Medialab\Service\User($config);
+$media = new Medialab\Service\Media($config);
 
 try {
-	$info = $user->getUserInfo();
+	$info = $media->getFolderContents();
 	echo '<pre>';
 	print_r($info);
 	echo '</pre>';

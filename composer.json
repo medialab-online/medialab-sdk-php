@@ -5,13 +5,18 @@
 	"homepage": "http://www.medialab.co",
 	"license": "MIT",
 	"require": {
-		"php": ">= 5.3.0",
+		"php": ">= 5.5.0",
 		"ext-curl": "*",
-		"league/oauth2-client": "0.10.1"
+		"league/oauth2-client": "1.1.*"
 	},
 	"autoload": {
 		"psr-4": {
 			"Medialab\\": "src/Medialab/"
+		}
+	},
+	"extra": {
+		"branch-alias": {
+			"dev-master": "2.0.x-dev"
 		}
 	}
 }

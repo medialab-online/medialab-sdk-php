@@ -6,72 +6,17 @@ use League\OAuth2\Client\Provider\AbstractProvider;
 use League\OAuth2\Client\Token\AccessToken;
 
 class MedialabProvider extends AbstractProvider {
-	public $uidKey = 'user_id';
+	/**
+	 * @var string Key used in the access token response to identify the resource owner.
+	 */
+	const ACCESS_TOKEN_RESOURCE_OWNER_ID = 'user_id';
 
-	public $medialabUri;
+	protected $medialabUri;
 
-	function __construct($options = []) {
-		parent::__construct($options);
+	protected $scopes = array();
 
-		$this->authorizationHeader = 'Bearer ';
-	}
-
-	public function prepareRequest(AccessToken $token, $http_method, $api_method, $options = array(), $body = null)  {
-        $headers = $this->getHeaders($token);
-		$client = $this->getHttpClient();
-		$client->setBaseUrl($this->createUrl($api_method));
-		$client->setDefaultOption('headers', $headers);
-
-		if(isset($options['curl'])) {
-			// work-around for missing features in old guzzle version
-			$client->getConfig()->set('curl.options', $options['curl']);
-		}
-
-		switch(strtoupper($http_method)) {
-			case 'GET':
-				$request = $client->get(null, null, $options);
-				break;
-			case 'HEAD':
-				$request = $client->head(null, null, $options);
-				break;
-			case 'DELETE':
-				$request = $client->delete(null, null, $body, $options);
-				break;
-			case 'PUT':
-				$request = $client->put(null, null, $body, $options);
-				break;
-			case 'PATCH':
-				$request = $client->patch(null, null, $body, $options);
-				break;
-			case 'POST':
-				$request = $client->post(null, null, $body, $options);
-				break;
-			case 'OPTIONS':
-				$request = $client->options(null, $options);
-				break;
-		}
-
-		return $request;
-    }
-	public function execute(AccessToken $token, $http_method, $api_method, $options = array(), $body = null)  {
-		$request = $this->prepareRequest($token, $http_method, $api_method, $options, $body);
-		return $request->send();
-    }
-
-	public function urlAuthorize() {
-		return $this->createUrl('oauth2/authorize');
-	}
-
-	public function urlAccessToken() {
-		return $this->createUrl('oauth2/token');
-	}
-
-	public function urlUserDetails(AccessToken $token) {
-
-	}
-
-	public function userDetails($response, AccessToken $token) {
-
+	public function __construct(array $options = [], array $collaborators = []) {
+		parent::__construct($options, $collaborators);
 	}
 
 	/**
@@ -85,5 +30,45 @@ class MedialabProvider extends AbstractProvider {
 			throw new \LogicException('No MediaLab URI given.');
 		}
 		return $this->medialabUri . $api_method;
+	}
+
+	public function getAuthorizationUrl(array $options = []) {
+		// this one is a tough one, it's impossible to provide the scopes and state anywhere else
+		// than in this options array,
+		$options['state'] = $this->getState();
+
+		if(!empty($this->scopes)) {
+			$options['scope'] = $this->scopes;
+		}
+
+		return parent::getAuthorizationUrl($options);
+
+	}
+
+	protected function checkResponse(\Psr\Http\Message\ResponseInterface $response, $data) {
+	}
+
+	protected function createResourceOwner(array $response, AccessToken $token) {
+	}
+
+	protected function getDefaultScopes() {
+		return \Medialab\Scopes::SCOPE_USER_INFO;
+	}
+
+	public function getBaseAccessTokenUrl(array $params) {
+		return $this->createUrl('oauth2/token');
+	}
+
+	public function getBaseAuthorizationUrl() {
+		return $this->createUrl('oauth2/authorize');
+	}
+
+	public function getResourceOwnerDetailsUrl(AccessToken $token) {
+		return $this->createUrl('user/info');
+
+	}
+
+	protected function getAuthorizationHeaders($token = null) {
+		return array('Authorization' => 'Bearer ' . $token);
 	}
 }

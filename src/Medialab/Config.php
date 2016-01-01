@@ -5,20 +5,24 @@ namespace Medialab;
 class Config {
 
 	/**
-	 * @var \Medialab\OAuth\MedialabProvider $provider
+	 * @var \Medialab\Client $medialab_client
 	 */
-	protected $provider;
-
-	function __construct()  {
-		$this->provider = new OAuth\MedialabProvider();
-	}
+	protected $medialab_client;
 
 	/**
-	 * Return MedialabProvider
-	 * @return \Medialab\OAuth\MedialabProvider
+	 * @var array $options
 	 */
-	public function getProvider() {
-		return $this->provider;
+	protected $options = [
+		'medialabUri' => '',
+		'clientId' => '',
+		'clientSecret' => '',
+		'redirectUri' => '',
+		'state' => '',
+		'scopes' => [],
+	];
+
+	function __construct() {
+		$this->options['state'] = md5(uniqid());
 	}
 
 	/**
@@ -33,7 +37,7 @@ class Config {
 		if(strpos($medialab_uri, 'api/') === false) {
 			$medialab_uri .= 'api/';
 		}
-		$this->provider->medialabUri = $medialab_uri;
+		$this->options['medialabUri'] = $medialab_uri;
 		return $this;
 	}
 
@@ -44,8 +48,8 @@ class Config {
 	 * @return \Medialab\Config
 	 */
 	public function setClient($client_id, $client_secret) {
-		$this->provider->clientId = $client_id;
-		$this->provider->clientSecret = $client_secret;
+		$this->options['clientId'] = $client_id;
+		$this->options['clientSecret'] = $client_secret;
 		return $this;
 	}
 
@@ -56,7 +60,17 @@ class Config {
 	 * @return \Medialab\Config
 	 */
 	public function setRedirectUri($redirect_uri) {
-		$this->provider->redirectUri = $redirect_uri;
+		$this->options['redirectUri'] = $redirect_uri;
+		return $this;
+	}
+
+	/**
+	 * Set a state to prevent CSRF when authorizing
+	 * @param string $state
+	 * @return \Medialab\Config
+	 */
+	public function setState($state) {
+		$this->options['state'] = $state;
 		return $this;
 	}
 
@@ -66,7 +80,18 @@ class Config {
 	 * @return \Medialab\Config
 	 */
 	public function addScope($scope) {
-		$this->provider->scopes[] = $scope;
+		$this->options['scopes'][] = $scope;
 		return $this;
+	}
+
+	/**
+	 * Get a MediaLab client with the provided configuration
+	 * @return \Medialab\Client
+	 */
+	public function getClient() {
+		if($this->medialab_client === null) {
+			$this->medialab_client = new Client($this->options);
+		}
+		return $this->medialab_client;
 	}
 }
