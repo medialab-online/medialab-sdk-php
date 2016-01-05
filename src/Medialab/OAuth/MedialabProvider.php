@@ -71,4 +71,8 @@ class MedialabProvider extends AbstractProvider {
 	protected function getAuthorizationHeaders($token = null) {
 		return array('Authorization' => 'Bearer ' . $token);
 	}
+
+	protected function getScopeSeparator() {
+		return ' ';
+	}
 }
