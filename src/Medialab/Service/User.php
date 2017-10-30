@@ -2,6 +2,12 @@
 
 namespace Medialab\Service;
 
+/**
+ * Class User
+ * @package medialab-sdk-php
+ *
+ * User-related API methods.
+ */
 class User extends MedialabService {
 
 	function __construct($config) {
@@ -9,7 +15,7 @@ class User extends MedialabService {
 	}
 
 	/**
-	 * Get information about the user
+	 * Get information about the user.
 	 * @return array
 	 */
 	public function getUserInfo() {

@@ -1,42 +1,47 @@
 <?php
 
 namespace Medialab\Service;
-use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Exception\BadResponseException;
 
+/**
+ * Class MedialabService
+ * @package medialab-sdk-php
+ *
+ * Service class to execute requests against the API.
+ * Depending on the loaded config, the requests will be authenticated accordingly (either OAuth2 or Private Token).
+ */
 class MedialabService {
 
 	/**
-	 * @var \Medialab\Client $client
+	 * @var \Medialab\Config\ConfigInterface
 	 */
-	protected $client;
+	private $config;
 
 	/**
 	 * @var string $response_type
 	 */
-	protected $response_type = 'json';
+	private $response_type = 'json';
 
-	function __construct(\Medialab\Config $config) {
-		$this->client = $config->getClient();
+	function __construct(\Medialab\Config\ConfigInterface $config) {
+		$this->config = $config;
 	}
 
 	/**
-	 * Prepare a Guzzle request
+	 * Prepare a new request
 	 * @param string $api_method
 	 * @param string $http_method
 	 * @param array $options
 	 * @param mixed $body
-	 * @return \GuzzleHTTP\Psr7\Request
+	 * @return \Psr\Http\Message\RequestInterface
 	 */
-    public function prepare($api_method, $http_method, $options = array(), $body = null)  {
+    public function prepare(string $api_method, string $http_method, array $options = [], $body = null): \Psr\Http\Message\RequestInterface {
 		if($body !== null) {
 			$options['body'] = $body;
 		}
 
-		return $this->client->getProvider()->getAuthenticatedRequest(
+		return $this->getClient()->prepareRequest(
+			$this->generateURL($api_method),
 			$http_method,
-			$this->client->getProvider()->createUrl($api_method),
-			$this->client->getAccessToken(),
 			$options
 		);
     }
@@ -51,36 +56,31 @@ class MedialabService {
 	 * @return mixed
 	 * @throws \Exception
 	 */
-    public function execute($api_method, $http_method, $options = array(), $body = null, $parse = true)  {
+    public function execute(string $api_method, string $http_method, array $options = [], $body = null, bool $parse = true)  {
 		if($body !== null) {
 			$options['body'] = $body;
 		}
-		// get authorization headers from oauth provider
-		$options['headers'] = $this->client->getProvider()->getHeaders($this->client->getAccessToken());
 
-		try {
-			$response = $this->client->getProvider()->getHttpClient()->request(
-				$http_method,
-				$this->client->getProvider()->createUrl($api_method),
-				$options
-			);
-		} catch(GuzzleException $ex) {
-			throw new \Exception($ex->getMessage());
-		}
+		$response = $this->getClient()->executeRequest(
+			$this->generateURL($api_method),
+			$http_method,
+			$options
+		);
 
 		if($parse) {
 			return $this->parse($response);
 		}
+
 		return $response;
     }
 
 	/**
 	 * Parse guzzle response
-	 * @param \GuzzleHttp\Psr7\Response $response
+	 * @param \Psr\Http\Message\ResponseInterface $response
 	 * @return mixed
 	 * @throws \Exception
 	 */
-	public function parse(\GuzzleHttp\Psr7\Response $response) {
+	public function parse(\Psr\Http\Message\ResponseInterface $response) {
 		try {
 			$response_string = $response->getBody();
 		} catch (BadResponseException $ex) {
@@ -103,5 +103,30 @@ class MedialabService {
 			throw new \Exception($result['error']);
 		}
 		return $result;
+	}
+
+	/**
+	 * Get instance of the loaded config object.
+	 * @return \Medialab\Config\ConfigInterface
+	 */
+	protected function getConfig(): \Medialab\Config\ConfigInterface {
+		return $this->config;
+	}
+
+	/**
+	 * Generate a full URL to the given API method.
+	 * @param string $api_method
+	 * @return string
+	 */
+	private function generateURL(string $api_method): string {
+		return $this->config->getURL() . $api_method;
+	}
+
+	/**
+	 * Get the client.
+	 * @return \Medialab\Client\ClientInterface
+	 */
+	private function getClient(): \Medialab\Client\ClientInterface {
+		return $this->config->getClient();
 	}
 }

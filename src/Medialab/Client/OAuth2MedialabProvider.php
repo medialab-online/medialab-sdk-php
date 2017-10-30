@@ -1,19 +1,31 @@
 <?php
 
-namespace Medialab\OAuth;
+namespace Medialab\Client;
 
 use League\OAuth2\Client\Provider\AbstractProvider;
 use League\OAuth2\Client\Token\AccessToken;
 
-class MedialabProvider extends AbstractProvider {
+/**
+ * Class OAuth2MedialabProvider
+ * @package medialab-sdk-php
+ *
+ * This is a MediaLab-specific implementation for the League\OAuth2 client library.
+ */
+class OAuth2MedialabProvider extends AbstractProvider {
 	/**
 	 * @var string Key used in the access token response to identify the resource owner.
 	 */
 	const ACCESS_TOKEN_RESOURCE_OWNER_ID = 'user_id';
 
-	protected $medialabUri;
-
+	/**
+	 * @var array
+	 */
 	protected $scopes = array();
+
+	/**
+	 * @var string
+	 */
+	private $api_url;
 
 	public function __construct(array $options = [], array $collaborators = []) {
 		parent::__construct($options, $collaborators);
@@ -21,15 +33,12 @@ class MedialabProvider extends AbstractProvider {
 
 	/**
 	 * Create API url
-	 * @param string $api_method
-	 * @return string
-	 * @throws \LogicException
+	 * @param string $api_url
+	 * @return OAuth2MedialabProvider
 	 */
-	public function createUrl($api_method) {
-		if(empty($this->medialabUri)) {
-			throw new \LogicException('No MediaLab URI given.');
-		}
-		return $this->medialabUri . $api_method;
+	public function setMedialabApiURL(string $api_url): OAuth2MedialabProvider {
+		$this->api_url = $api_url;
+		return $this;
 	}
 
 	public function getAuthorizationUrl(array $options = []) {
@@ -56,15 +65,15 @@ class MedialabProvider extends AbstractProvider {
 	}
 
 	public function getBaseAccessTokenUrl(array $params) {
-		return $this->createUrl('oauth2/token');
+		return $this->getMedialabApiURL('oauth2/token');
 	}
 
 	public function getBaseAuthorizationUrl() {
-		return $this->createUrl('oauth2/authorize');
+		return $this->getMedialabApiURL('oauth2/authorize');
 	}
 
 	public function getResourceOwnerDetailsUrl(AccessToken $token) {
-		return $this->createUrl('user/info');
+		return $this->getMedialabApiURL('user/info');
 
 	}
 
@@ -74,5 +83,14 @@ class MedialabProvider extends AbstractProvider {
 
 	protected function getScopeSeparator() {
 		return ' ';
+	}
+
+	/**
+	 * Generate URL to the API.
+	 * @param string $api_method
+	 * @return string
+	 */
+	private function getMedialabApiURL(string $api_method): string {
+		return $this->api_url . $api_method;
 	}
 }

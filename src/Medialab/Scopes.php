@@ -2,6 +2,12 @@
 
 namespace Medialab;
 
+/**
+ * Class Scopes
+ * @package medialab-sdk-php
+ *
+ * An overview of all available scopes supported by the OAuth2 API.
+ */
 class Scopes {
 
 	/**

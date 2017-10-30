@@ -2,10 +2,11 @@
 	"name": "medialab/medialab-sdk-php",
 	"description": "MediaLab SDK for PHP",
 	"keywords" : [ "medialab" ],
-	"homepage": "http://www.medialab.co",
+	"homepage": "https://www.medialab.co",
+	"version": "3.0",
 	"license": "MIT",
 	"require": {
-		"php": ">= 5.5.0",
+		"php": ">= 7.1.0",
 		"ext-curl": "*",
 		"league/oauth2-client": "1.1.*"
 	},
