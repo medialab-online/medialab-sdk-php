@@ -3,6 +3,7 @@
 namespace Medialab\Client;
 
 use League\OAuth2\Client\Provider\AbstractProvider;
+use League\OAuth2\Client\Provider\GenericProvider;
 use League\OAuth2\Client\Token\AccessToken;
 
 /**

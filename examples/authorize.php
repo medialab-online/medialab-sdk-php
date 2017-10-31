@@ -1,9 +1,13 @@
 <?php
 
-define('ML_MEDIALAB_URI', 'https://demo.medialab.co');
+define('ML_MEDIALAB_URI', 'https://example.medialab.co');
 define('ML_API_CLIENT', '<INSERT_CLIENT_ID_HERE>');
 define('ML_API_SECRET', '<INSERT_CLIENT_SECRET_HERE>');
-define('ML_REDIRECT_URI', 'http://path/to/project/authorize.php');
+define('ML_REDIRECT_URI', 'https://path/to/project/authorize.php');
+
+/**
+ * The OAuth2 workflow allows
+ */
 
 require_once __DIR__ . '/../vendor/autoload.php';
 session_start();
@@ -18,13 +22,13 @@ if(isset($_SESSION['medialab_api_redirect']) && (isset($_GET['error']) || isset(
 
 /**
  * Attempt to authenticate with the API, or redirect the user where necessary.
- * @param Medialab\Config $config
+ * @param Medialab\Config\OAuth2Config $config
  * @param string $redirect_to
  * @param boolean $verbose print access_token/expiry time on succesful authentication
  * @return \League\OAuth2\Client\Token\AccessToken
  * @throws \InvalidArgumentException
  */
-function ml_api_authenticate(Medialab\Config $config, $redirect_to = null, $verbose = true) {
+function ml_api_authenticate(Medialab\Config\OAuth2Config $config, $redirect_to = null, $verbose = true) {
 	$client = $config->getClient();
 
 	if(isset($_GET['error'])) {
@@ -71,7 +75,7 @@ function ml_api_authenticate(Medialab\Config $config, $redirect_to = null, $verb
 		// We include a "state" to prevent CSRF attacks.
 		$_SESSION['medialab_state'] = $client->getState();
 
-		printf('<a href="%s">Please follow this link to authenticate your app</a>', $client->getAuthorizationUrl([]));
+		printf('<a href="%s">Please follow this link to authenticate your app</a>', $client->getAuthorizationUrl());
 		die();
 	}
 

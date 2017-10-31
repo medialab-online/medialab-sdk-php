@@ -1,6 +1,13 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [3.0.0] - 2017-10-31
+- Refactoring Config util to allow multiple types of config (OAuth2 and PrivateToken).
+  Please note these changes are not backwards compatible and will require a change to how the config class is set up.
+- Adding support to execute API methods while authenticating using a private token.
+- Upgrading League\OAuth2 client library to v2.2.
+- Refactoring all methods to include type hinting and return values, now requiring PHP 7.1+. 
+
 ## [2.0.1] - 2016-01-05
 - Changing scope delimiter to space as per OAuth2 specifications.
 

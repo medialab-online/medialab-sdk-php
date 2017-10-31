@@ -3,21 +3,15 @@
 	"description": "MediaLab SDK for PHP",
 	"keywords" : [ "medialab" ],
 	"homepage": "https://www.medialab.co",
-	"version": "3.0",
 	"license": "MIT",
 	"require": {
 		"php": ">= 7.1.0",
 		"ext-curl": "*",
-		"league/oauth2-client": "1.1.*"
+		"league/oauth2-client": "2.2.*"
 	},
 	"autoload": {
 		"psr-4": {
 			"Medialab\\": "src/Medialab/"
-		}
-	},
-	"extra": {
-		"branch-alias": {
-			"dev-master": "2.0.x-dev"
 		}
 	}
 }

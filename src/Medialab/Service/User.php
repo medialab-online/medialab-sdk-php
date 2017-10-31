@@ -10,7 +10,7 @@ namespace Medialab\Service;
  */
 class User extends MedialabService {
 
-	function __construct($config) {
+	function __construct(\Medialab\Config\ConfigInterface $config) {
 		parent::__construct($config);
 	}
 

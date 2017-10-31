@@ -20,9 +20,9 @@ abstract class AbstractConfig implements ConfigInterface {
 	 * @param string $url
 	 */
 	protected function setURL(string $url): void {
-		if (substr($url, -1) != '/') {
-			$url .= '/';
-		}
+		// make sure we have an ending slash
+		$url = rtrim($url, '/') . '/';
+
 		if (strpos($url, 'api/') === false) {
 			$url .= 'api/';
 		}
