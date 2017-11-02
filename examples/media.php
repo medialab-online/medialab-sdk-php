@@ -2,6 +2,11 @@
 
 require_once __DIR__ . '/authorize.php';
 
+/**
+ * This example uses the OAuth2 authorization from authorize.php.
+ * Then uses the Media service to display the folder contents.
+ */
+
 $config = new Medialab\Config\OAuth2Config(ML_MEDIALAB_URI);
 $config ->setClient(ML_API_CLIENT, ML_API_SECRET)
 		->setRedirectUri(ML_REDIRECT_URI)

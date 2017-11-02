@@ -2,9 +2,8 @@
 
 require_once __DIR__ . '/authorize.php';
 
-$config = new Medialab\OAuth2Config();
-$config ->setMedialab(ML_MEDIALAB_URI)
-		->setClient(ML_API_CLIENT, ML_API_SECRET)
+$config = new Medialab\Config\OAuth2Config(ML_MEDIALAB_URI);
+$config ->setClient(ML_API_CLIENT, ML_API_SECRET)
 		->setRedirectUri(ML_REDIRECT_URI)
 		->addScope(Medialab\Scopes::SCOPE_USER_INFO);
 

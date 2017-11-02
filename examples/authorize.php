@@ -6,7 +6,13 @@ define('ML_API_SECRET', '<INSERT_CLIENT_SECRET_HERE>');
 define('ML_REDIRECT_URI', 'https://path/to/project/authorize.php');
 
 /**
- * The OAuth2 workflow allows
+ * The OAuth2 workflow requires forwarding the user to the MediaLab authorize page to grant permission to your app.
+ * The access token is then stored in a local session, together with a refresh token, that we can use to request
+ * a new access token without having to forward the user again.
+ * If neither access token nor refresh token are present, we will need to forward the user again.
+ *
+ * The code below is an example on how you could set up the authorize workflow.
+ * In order for this to work, you must have a registered API client, with the redirect URI matching the "ML_DIRECT_URI" constant.
  */
 
 require_once __DIR__ . '/../vendor/autoload.php';

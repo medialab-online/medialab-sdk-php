@@ -30,7 +30,8 @@ class MedialabService {
 	 * Prepare a new request
 	 * @param string $api_method
 	 * @param string $http_method
-	 * @param array $options
+	 * @param array $options request options compatible with GuzzleHttp client,
+	 *              e.g. 'headers', 'query' (GET vars), 'form_params' (POST vars), 'timeout', ...
 	 * @param mixed $body
 	 * @return \Psr\Http\Message\RequestInterface
 	 */
@@ -50,7 +51,8 @@ class MedialabService {
 	 * Execute an API call
 	 * @param string $api_method
 	 * @param string $http_method
-	 * @param array $options
+	 * @param array $options request options compatible with GuzzleHttp client,
+	 *              e.g. 'headers', 'query' (GET vars), 'form_params' (POST vars), 'timeout', ...
 	 * @param mixed $body
 	 * @param boolean $parse
 	 * @return mixed
