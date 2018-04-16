@@ -1,6 +1,10 @@
 # Change Log
 All notable changes to this project will be documented in this file.
 
+## [3.1.0] - 2018-04-16
+- The Guzzle HTTP client is now set/taken from the Config objects to allow for a custom HTTP client (it can no longer be set in the PrivateTokenClient).
+- The OAuth2 provider creation is now also part of the Config objects.
+
 ## [3.0.0] - 2017-10-31
 - Refactoring Config util to allow multiple types of config (OAuth2 and PrivateToken).
   Please note these changes are not backwards compatible and will require a change to how the config class is set up.

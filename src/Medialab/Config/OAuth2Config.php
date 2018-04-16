@@ -11,7 +11,7 @@ namespace Medialab\Config;
 class OAuth2Config extends AbstractConfig {
 
 	/**
-	 * @var \Medialab\Client\PrivateTokenClient
+	 * @var \Medialab\Client\OAuth2Client
 	 */
 	private $client;
 
@@ -27,21 +27,21 @@ class OAuth2Config extends AbstractConfig {
 	];
 
 	/**
+	 * @var \Medialab\Client\OAuth2MedialabProvider
+	 */
+	private $provider;
+
+	/**
 	 * OAuth2Config constructor.
 	 * @param string $medialab_url
 	 */
 	public function __construct(string $medialab_url) {
+		parent::__construct();
+
 		$this->setURL($medialab_url);
 
 		$this->options['state'] = md5(uniqid());
-	}
 
-	/**
-	 * Get an array with all OAuth2 options.
-	 * @return array
-	 */
-	public function getOAuth2Options(): array {
-		return $this->options;
 	}
 
 	/**
@@ -96,5 +96,20 @@ class OAuth2Config extends AbstractConfig {
 			$this->client = new \Medialab\Client\OAuth2Client($this);
 		}
 		return $this->client;
+	}
+
+	/**
+	 * Load a new instance for the Medialab OAuth2 provider.
+	 * @return \Medialab\Client\OAuth2MedialabProvider
+	 */
+	public function getOAuth2MedialabProvider(): \Medialab\Client\OAuth2MedialabProvider {
+		if($this->provider === null) {
+			$this->provider = new \Medialab\Client\OAuth2MedialabProvider($this->options, [
+				'httpClient' => $this->getHttpClient(),
+			]);
+			$this->provider->setMedialabApiURL($this->getURL());
+		}
+
+		return $this->provider;
 	}
 }

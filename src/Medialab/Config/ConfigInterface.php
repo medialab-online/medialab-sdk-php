@@ -21,4 +21,10 @@ interface ConfigInterface {
 	 * @return \Medialab\Client\ClientInterface
 	 */
 	public function getClient();
+
+	/**
+	 * Get instance of the Http client.
+	 * @return \GuzzleHttp\ClientInterface
+	 */
+	public function getHttpClient(): \GuzzleHttp\ClientInterface;
 }

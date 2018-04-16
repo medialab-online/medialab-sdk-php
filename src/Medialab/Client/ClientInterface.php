@@ -31,4 +31,10 @@ interface ClientInterface {
 	 */
 	public function executeRequest(string $url, string $http_method, array $options = []): \Psr\Http\Message\ResponseInterface;
 
+	/**
+	 * Get guzzle http client
+	 * @return \GuzzleHttp\ClientInterface
+	 */
+	public function getHttpClient(): \GuzzleHttp\ClientInterface;
+
 }

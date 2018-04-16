@@ -1,6 +1,7 @@
 <?php
 
 namespace Medialab\Client;
+
 use GuzzleHttp\Exception\GuzzleException;
 
 /**
@@ -22,11 +23,6 @@ class OAuth2Client implements ClientInterface {
 	private $config;
 
 	/**
-	 * @var OAuth2MedialabProvider
-	 */
-	private $provider;
-
-	/**
 	 * @var \League\OAuth2\Client\Token\AccessToken
 	 */
 	private $token;
@@ -37,8 +33,6 @@ class OAuth2Client implements ClientInterface {
 	 */
 	public function __construct(\Medialab\Config\OAuth2Config $config) {
 		$this->config = $config;
-		$this->provider = new OAuth2MedialabProvider($config->getOAuth2Options());
-		$this->provider->setMedialabApiURL($config->getURL());
 	}
 
 	/**
@@ -50,7 +44,7 @@ class OAuth2Client implements ClientInterface {
 	 * @return \Psr\Http\Message\RequestInterface
 	 */
 	public function prepareRequest(string $url, string $http_method, array $options = []): \Psr\Http\Message\RequestInterface {
-		return $this->provider->getAuthenticatedRequest(
+		return $this->getProvider()->getAuthenticatedRequest(
 			$http_method,
 			$url,
 			$this->getAccessToken(),
@@ -87,7 +81,7 @@ class OAuth2Client implements ClientInterface {
 	 * @return string
 	 */
 	public function getAuthorizationUrl(): string {
-		return $this->provider->getAuthorizationUrl();
+		return $this->getProvider()->getAuthorizationUrl();
 	}
 
 	/**
@@ -98,7 +92,7 @@ class OAuth2Client implements ClientInterface {
 	 */
 	public function loadAccessTokenFromAuthCode(string $authorization_code): \League\OAuth2\Client\Token\AccessToken {
 		try {
-			$this->token = $this->provider->getAccessToken('authorization_code', array(
+			$this->token = $this->getProvider()->getAccessToken('authorization_code', array(
 				'code' => $authorization_code
 			));
 		} catch (\League\OAuth2\Client\Provider\Exception\IdentityProviderException $ex) {
@@ -137,7 +131,7 @@ class OAuth2Client implements ClientInterface {
 	 * @throws \InvalidArgumentException
 	 */
 	public function loadAccessTokenFromRefreshToken(string $refresh_token): \League\OAuth2\Client\Token\AccessToken {
-		$this->token = $this->provider->getAccessToken('refresh_token', [
+		$this->token = $this->getProvider()->getAccessToken('refresh_token', [
 			'refresh_token' => $refresh_token,
 		]);
 		return $this->token;
@@ -156,7 +150,15 @@ class OAuth2Client implements ClientInterface {
 	 * @return string
 	 */
 	public function getState(): string {
-		return $this->provider->getState();
+		return $this->getProvider()->getState();
+	}
+
+	/**
+	 * Get guzzle http client
+	 * @return \GuzzleHttp\ClientInterface
+	 */
+	public function getHttpClient(): \GuzzleHttp\ClientInterface {
+		return $this->getProvider()->getHttpClient();
 	}
 
 	/**
@@ -164,6 +166,6 @@ class OAuth2Client implements ClientInterface {
 	 * @return OAuth2MedialabProvider
 	 */
 	private function getProvider(): OAuth2MedialabProvider {
-		return $this->provider;
+		return $this->config->getOAuth2MedialabProvider();
 	}
 }

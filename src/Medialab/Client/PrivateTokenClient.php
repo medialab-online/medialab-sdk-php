@@ -2,7 +2,6 @@
 
 namespace Medialab\Client;
 
-use GuzzleHttp\ClientInterface as HttpClientInterface;
 use GuzzleHttp\Exception\GuzzleException;
 
 /**
@@ -17,11 +16,6 @@ class PrivateTokenClient implements ClientInterface {
 	 * @var \Medialab\Config\PrivateTokenConfig
 	 */
 	private $config;
-
-	/**
-	 * @var \GuzzleHttp\ClientInterface
-	 */
-	private $http_client;
 
 	public function __construct(\Medialab\Config\PrivateTokenConfig $config) {
 		$this->config = $config;
@@ -66,25 +60,11 @@ class PrivateTokenClient implements ClientInterface {
 	}
 
 	/**
-	 * Sets the HTTP client instance.
-	 *
-	 * @param HttpClientInterface $client
-	 * @return ClientInterface
-	 */
-	public function setHttpClient(HttpClientInterface $client): ClientInterface {
-		$this->http_client = $client;
-		return $this;
-	}
-
-	/**
 	 * Get guzzle http client
-	 * @return HttpClientInterface
+	 * @return \GuzzleHttp\ClientInterface
 	 */
-	private function getHttpClient(): HttpClientInterface {
-		if ($this->http_client === null) {
-			$this->http_client = new \GuzzleHttp\Client();
-		}
-		return $this->http_client;
+	public function getHttpClient(): \GuzzleHttp\ClientInterface {
+		return $this->config->getHttpClient();
 	}
 
 	/**

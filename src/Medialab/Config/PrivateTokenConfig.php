@@ -21,6 +21,8 @@ class PrivateTokenConfig extends AbstractConfig {
 	private $private_token;
 
 	function __construct(string $medialab_url, string $privateToken) {
+		parent::__construct();
+
 		$this->setURL($medialab_url);
 		$this->private_token = $privateToken;
 	}
