@@ -10,7 +10,7 @@ use GuzzleHttp\Exception\BadResponseException;
  * Service class to execute requests against the API.
  * Depending on the loaded config, the requests will be authenticated accordingly (either OAuth2 or Private Token).
  */
-class MedialabService {
+class MedialabService implements MedialabServiceInterface {
 
 	/**
 	 * @var \Medialab\Config\ConfigInterface
@@ -59,12 +59,27 @@ class MedialabService {
 	 * @throws \Exception
 	 */
     public function execute(string $api_method, string $http_method, array $options = [], $body = null, bool $parse = true)  {
+		return $this->executeURL($this->generateURL($api_method), $http_method, $options, $body, $parse);
+    }
+
+	/**
+	 * Execute an API call
+	 * @param string $url
+	 * @param string $http_method
+	 * @param array $options request options compatible with GuzzleHttp client,
+	 *              e.g. 'headers', 'query' (GET vars), 'form_params' (POST vars), 'timeout', ...
+	 * @param mixed $body
+	 * @param boolean $parse
+	 * @return mixed
+	 * @throws \Exception
+	 */
+    public function executeURL(string $url, string $http_method, array $options = [], $body = null, bool $parse = true)  {
 		if($body !== null) {
 			$options['body'] = $body;
 		}
 
 		$response = $this->getClient()->executeRequest(
-			$this->generateURL($api_method),
+			$url,
 			$http_method,
 			$options
 		);

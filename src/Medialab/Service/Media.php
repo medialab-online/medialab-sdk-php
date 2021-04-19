@@ -100,9 +100,20 @@ class Media extends MedialabService {
 
 	/**
 	 * Start the upload process by requesting an upload id
+	 *
+	 * @param string|null $folder_id
+	 * @return array
 	 */
-	public function startUpload() {
-		$this->upload_id = $this->execute('upload/id', 'POST');
+	public function startUpload(string $folder_id = null) {
+		$options = [];
+		if($folder_id !== null) {
+			$options['form_params'] = [
+				'folder_id' => $folder_id,
+			];
+		}
+
+		$this->upload_id = $this->execute('upload/id', 'POST', $options);
+
 		return $this->upload_id;
 	}
 
@@ -118,9 +129,22 @@ class Media extends MedialabService {
 		if(!file_exists($path)) {
 			throw new \InvalidArgumentException('Invalid path to file provided');
 		}
+
+		// if we are uploading a single file, request a new upload uri first, then start uploading.
 		if(empty($this->upload_id)) {
-			$this->startUpload();
+			$single_upload = true;
+			$upload_id = $this->startUpload($folder_id);
+		} else {
+			$single_upload = false;
+			$upload_id = $this->upload_id;
+			// append folder_id to upload url, as it may differ per file in a single batch.
+			$upload_id['url_upload_direct'] .= '&folder_id=' . $folder_id;
 		}
+
+		if(empty($upload_id) || !isset($upload_id['url_upload_direct'])) {
+			throw new \InvalidArgumentException('No valid upload URL returned from API.');
+		}
+
 		$data = [
 			'name'     => 'file',
 			'contents' => fopen($path, 'r')
@@ -129,17 +153,26 @@ class Media extends MedialabService {
 			$data['filename'] = $filename;
 		}
 
-		return $this->execute(
-			"upload/file/{$this->upload_id['ulid']}/{$folder_id}", 'POST', array(
+		$result = $this->executeURL(
+			$upload_id['url_upload_direct'], 'POST', array(
 				'multipart' => [$data]
 		));
+		if($result && $single_upload) {
+			$this->executeURL($upload_id['api']['finish'], 'DELETE');
+		}
+		return $result;
 	}
 
 	/**
 	 * Finish the upload process
 	 */
 	public function finishUpload() {
-		$result = $this->execute('upload/id/' . $this->upload_id['ulid'], 'DELETE');
+		$result = [];
+
+		if(!empty($this->upload_id)) {
+			$result = $this->executeURL($this->upload_id['api']['finish'], 'DELETE');
+		}
+
 		$this->upload_id = null;
 		return $result;
 	}
